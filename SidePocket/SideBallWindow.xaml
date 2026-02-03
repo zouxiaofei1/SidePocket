@@ -6,12 +6,56 @@
         Width="32" Height="32" ResizeMode="NoResize"
         MouseDoubleClick="Window_MouseDoubleClick">
     
-    <Border CornerRadius="4" Background="#CCFFFFFF" BorderBrush="#33000000" 
+    <Border x:Name="MainBorder" CornerRadius="4" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" 
             BorderThickness="1" MouseLeftButtonDown="Border_MouseDown"
-            MouseMove="Border_MouseMove" MouseLeftButtonUp="Border_MouseUp">
+            MouseMove="Border_MouseMove" MouseLeftButtonUp="Border_MouseUp"
+            RenderTransformOrigin="0.5,0.5">
+        <Border.RenderTransform>
+            <ScaleTransform ScaleX="1" ScaleY="1"/>
+        </Border.RenderTransform>
         <Border.Effect>
-            <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
+            <DropShadowEffect x:Name="MainShadow" BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
         </Border.Effect>
         <Image Name="AppIcon" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
     </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="0.5" To="1" Duration="0:0:0.3">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase Amplitude="1" EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.5" To="1" Duration="0:0:0.3">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase Amplitude="1" EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseEnter" SourceName="MainBorder">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainShadow" Storyboard.TargetProperty="BlurRadius" To="12" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainShadow" Storyboard.TargetProperty="Opacity" To="0.4" Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave" SourceName="MainBorder">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainShadow" Storyboard.TargetProperty="BlurRadius" To="6" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="MainShadow" Storyboard.TargetProperty="Opacity" To="0.2" Duration="0:0:0.2"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
 </Window>

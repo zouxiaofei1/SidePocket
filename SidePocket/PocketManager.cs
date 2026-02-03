@@ -62,5 +62,21 @@ namespace SidePocket
                 }
             }
         }
+
+        public static void RestoreLast()
+        {
+            var keys = new List<IntPtr>(_pocketedWindows.Keys);
+            if (keys.Count > 0)
+            {
+                var lastHwnd = keys[keys.Count - 1];
+                NativeMethods.ShowWindow(lastHwnd, NativeMethods.SW_SHOW);
+                NativeMethods.ShowWindow(lastHwnd, NativeMethods.SW_RESTORE);
+                NativeMethods.SetForegroundWindow(lastHwnd);
+                if (_pocketedWindows.TryGetValue(lastHwnd, out var ball))
+                {
+                    ball.Close();
+                }
+            }
+        }
     }
 }

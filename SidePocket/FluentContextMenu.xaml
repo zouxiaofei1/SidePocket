@@ -5,15 +5,50 @@
         Topmost="True" ShowInTaskbar="False"
         Width="160" SizeToContent="Height"
         Deactivated="Window_Deactivated">
-    <Border CornerRadius="8" Background="#F2FFFFFF" BorderBrush="#33000000" BorderThickness="1" Margin="10">
+    <Border x:Name="MainBorder" CornerRadius="8" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="10" RenderTransformOrigin="0.5,0">
+        <Border.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                <TranslateTransform Y="0"/>
+            </TransformGroup>
+        </Border.RenderTransform>
         <Border.Effect>
             <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
         </Border.Effect>
         <StackPanel Margin="4">
+            <Image Source="pack://application:,,,/resources/icon.png" Width="48" Height="48" Margin="0,12" 
+                   HorizontalAlignment="Center" Cursor="Hand" 
+                   MouseLeftButtonDown="Logo_MouseLeftButtonDown"/>
+            <Separator Background="{DynamicResource BorderBrush}" Margin="4,2"/>
             <Button Content="还原所有窗口" Style="{StaticResource MenuButtonStyle}" Click="RestoreAll_Click"/>
             <Button Content="设置快捷键" Style="{StaticResource MenuButtonStyle}" Click="Settings_Click"/>
-            <Separator Background="#11000000" Margin="4,2"/>
+            <Separator Background="{DynamicResource BorderBrush}" Margin="4,2"/>
             <Button Content="退出" Style="{StaticResource MenuButtonStyle}" Click="Exit_Click"/>
         </StackPanel>
     </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0.8" To="1" Duration="0:0:0.2">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0.8" To="1" Duration="0:0:0.2">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="MainBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="-20" To="0" Duration="0:0:0.2">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.15"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
 </Window>

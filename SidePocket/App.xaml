@@ -4,6 +4,31 @@
              xmlns:local="clr-namespace:SidePocket"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <!-- Theme Colors -->
+        <Color x:Key="WindowBackgroundColor">#F3F3F3</Color>
+        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+        
+        <Color x:Key="CardBackgroundColor">#FFFFFF</Color>
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackgroundColor}"/>
+
+        <Color x:Key="HeaderTextColor">#666666</Color>
+        <SolidColorBrush x:Key="HeaderTextBrush" Color="{StaticResource HeaderTextColor}"/>
+
+        <Color x:Key="MainTextColor">#000000</Color>
+        <SolidColorBrush x:Key="MainTextBrush" Color="{StaticResource MainTextColor}"/>
+
+        <Color x:Key="SubTextColor">#666666</Color>
+        <SolidColorBrush x:Key="SubTextBrush" Color="{StaticResource SubTextColor}"/>
+
+        <Color x:Key="BorderColor">#11000000</Color>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+        <Color x:Key="RecorderBackgroundColor">#F9F9F9</Color>
+        <SolidColorBrush x:Key="RecorderBackgroundBrush" Color="{StaticResource RecorderBackgroundColor}"/>
+
+        <Color x:Key="HoverBackgroundColor">#11000000</Color>
+        <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
+
         <!-- 基础文本渲染优化 -->
         <Style TargetType="Window">
             <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
@@ -14,6 +39,7 @@
 
         <Style x:Key="MenuButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource MainTextBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -28,10 +54,10 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#11000000"/>
+                    <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#22000000"/>
+                    <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -63,7 +89,7 @@
         <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="24,6"/>
-            <Setter Property="BorderBrush" Value="#33000000"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -74,6 +100,43 @@
                                 CornerRadius="4" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FluentCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource MainTextBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="8,0,0,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid x:Name="templateRoot" Background="Transparent" SnapsToDevicePixels="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="checkBoxBorder" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Left" Height="20" Margin="1" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Width="20">
+                                <Grid x:Name="markGrid">
+                                    <Path x:Name="optionMark" Data="M15.012,1.92L6.151,10.781L1.819,6.449L0.875,7.393L6.151,12.669L15.956,2.864L15.012,1.92Z" Fill="White" Margin="3" Stretch="Uniform" Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+                            <ContentPresenter x:Name="contentPresenter" Grid.Column="1" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="checkBoxBorder" Value="{DynamicResource HoverBackgroundBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" TargetName="checkBoxBorder" Value="#0067C0"/>
+                                <Setter Property="BorderBrush" TargetName="checkBoxBorder" Value="#0067C0"/>
+                                <Setter Property="Visibility" TargetName="optionMark" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter Property="Background" TargetName="checkBoxBorder" Value="Transparent"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

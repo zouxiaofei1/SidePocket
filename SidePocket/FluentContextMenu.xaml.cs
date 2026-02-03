@@ -28,9 +28,18 @@ namespace SidePocket
             this.Close();
         }
 
+        private void Logo_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                Settings_Click(sender, e);
+            }
+        }
+
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Application.Current.Shutdown();
+            // 通过关闭主窗口来触发有序退出
+            System.Windows.Application.Current.MainWindow.Close();
         }
 
         private void Window_Deactivated(object sender, EventArgs e)

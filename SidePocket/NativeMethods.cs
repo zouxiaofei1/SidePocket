@@ -68,8 +68,12 @@ public static class NativeMethods
     }
 
     // 常量
+    public const int MOD_ALT = 0x0001;
+    public const int MOD_CONTROL = 0x0002;
+    public const int MOD_SHIFT = 0x0004;
     public const int MOD_WIN = 0x0008;
     public const uint VK_OEM_3 = 0xC0; // `~` key
+
     public const int GCL_HICON = -14;
     public const int GCL_HICONSM = -34;
     public const int WM_GETICON = 0x007F;
@@ -86,4 +90,10 @@ public static class NativeMethods
         else
             return new IntPtr(GetClassLong32(hWnd, nIndex));
     }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SetProcessDPIAware();
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 }

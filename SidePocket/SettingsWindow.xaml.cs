@@ -1,9 +1,20 @@
+using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace SidePocket
 {
     public partial class SettingsWindow : Window
     {
+        private FullConfig _tempConfig;
+        private Border? _activeRecorder = null;
+        private const string RUN_KEY = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+        private const string APP_NAME = "SidePocket";
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -13,12 +24,75 @@ namespace SidePocket
             }
             catch { }
             
-            this.KeyDown += (s, e) => { if (e.Key == System.Windows.Input.Key.Escape) this.Close(); };
+            _tempConfig = new FullConfig
+            {
+                PocketHotKey = new HotKeyConfig { Modifiers = ConfigManager.Current.PocketHotKey.Modifiers, Key = ConfigManager.Current.PocketHotKey.Key },
+                RestoreHotKey = new HotKeyConfig { Modifiers = ConfigManager.Current.RestoreHotKey.Modifiers, Key = ConfigManager.Current.RestoreHotKey.Key }
+            };
+            
+            UpdateDisplay();
+            CheckAutoStartStatus();
+            this.KeyDown += (s, e) => { if (e.Key == Key.Escape && _activeRecorder == null) this.Close(); };
         }
 
-        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void CheckAutoStartStatus()
         {
-            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            try
+            {
+                using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(RUN_KEY))
+                {
+                    if (key != null)
+                    {
+                        object? value = key.GetValue(APP_NAME);
+                        if (AutoStartCheck != null)
+                        {
+                            AutoStartCheck.IsChecked = value != null;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void AutoStart_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(RUN_KEY, true))
+                {
+                    if (key != null)
+                    {
+                        if (AutoStartCheck.IsChecked == true)
+                        {
+                            string appPath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                            if (!string.IsNullOrEmpty(appPath))
+                            {
+                                // Wrap path in quotes to handle spaces
+                                key.SetValue(APP_NAME, """ + appPath + """);
+                            }
+                        }
+                        else
+                        {
+                            key.DeleteValue(APP_NAME, false);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("设置开机启动失败: " + ex.Message);
+            }
+        }
+
+        private void UpdateDisplay()
+        {
+            PocketHotKeyDisplay.Text = _tempConfig.PocketHotKey.ToString();
+            RestoreHotKeyDisplay.Text = _tempConfig.RestoreHotKey.ToString();
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
                 this.DragMove();
         }
 
@@ -27,33 +101,95 @@ namespace SidePocket
             this.Close();
         }
 
-        private void HotKeyTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void HotKeyRecorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = true;
-            
-            // 忽略单独的修饰键
-            if (e.Key == System.Windows.Input.Key.System || e.Key == System.Windows.Input.Key.LWin || e.Key == System.Windows.Input.Key.RWin || 
-                e.Key == System.Windows.Input.Key.LeftCtrl || e.Key == System.Windows.Input.Key.RightCtrl ||
-                e.Key == System.Windows.Input.Key.LeftAlt || e.Key == System.Windows.Input.Key.RightAlt ||
-                e.Key == System.Windows.Input.Key.LeftShift || e.Key == System.Windows.Input.Key.RightShift)
+            if (sender is Border border)
             {
+                StartRecording(border);
+            }
+        }
+
+        private void StartRecording(Border border)
+        {
+            _activeRecorder = border;
+            _activeRecorder.Focus();
+            _activeRecorder.Background = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["HoverBackgroundBrush"];
+            
+            if (_activeRecorder.Tag?.ToString() == "Pocket")
+                PocketHotKeyDisplay.Text = "请按下快捷键...";
+            else
+                RestoreHotKeyDisplay.Text = "请按下快捷键...";
+        }
+
+        private void HotKeyRecorder_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (_activeRecorder != null)
+            {
+                _activeRecorder.Background = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["RecorderBackgroundBrush"];
+                _activeRecorder = null;
+            }
+            UpdateDisplay();
+        }
+
+        private void HotKeyRecorder_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (_activeRecorder == null) return;
+
+            e.Handled = true;
+
+            var key = e.Key;
+            if (key == Key.System) key = e.SystemKey;
+
+            var modifiers = Keyboard.Modifiers;
+
+            if (key == Key.Escape)
+            {
+                _activeRecorder.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 return;
             }
 
-            // 这里简单处理显示，实际逻辑需要保存修饰键状态
-            string keyText = e.Key.ToString();
-            if (e.Key == System.Windows.Input.Key.Oem3) keyText = "~";
-            HotKeyTextBox.Text = keyText;
+            if (key == Key.LeftCtrl || key == Key.RightCtrl ||
+                key == Key.LeftAlt || key == Key.RightAlt ||
+                key == Key.LeftShift || key == Key.RightShift ||
+                key == Key.LWin || key == Key.RWin)
+            {
+                if (_activeRecorder.Tag?.ToString() == "Pocket")
+                    PocketHotKeyDisplay.Text = GetModifiersText(modifiers) + "...";
+                else
+                    RestoreHotKeyDisplay.Text = GetModifiersText(modifiers) + "...";
+                return;
+            }
+
+            var targetConfig = _activeRecorder.Tag?.ToString() == "Pocket" ? _tempConfig.PocketHotKey : _tempConfig.RestoreHotKey;
+            targetConfig.Modifiers = modifiers;
+            targetConfig.Key = key;
+
+            _activeRecorder.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+        }
+
+        private string GetModifiersText(ModifierKeys modifiers)
+        {
+            var sb = new System.Text.StringBuilder();
+            if ((modifiers & ModifierKeys.Windows) != 0) sb.Append("Win + ");
+            if ((modifiers & ModifierKeys.Control) != 0) sb.Append("Ctrl + ");
+            if ((modifiers & ModifierKeys.Alt) != 0) sb.Append("Alt + ");
+            if ((modifiers & ModifierKeys.Shift) != 0) sb.Append("Shift + ");
+            return sb.ToString();
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            HotKeyTextBox.Text = "~";
+            _tempConfig = new FullConfig();
+            UpdateDisplay();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: 实际保存设置到配置并刷新 MainWindow 的热键
+            ConfigManager.Save(_tempConfig);
+            if (System.Windows.Application.Current.MainWindow is MainWindow main)
+            {
+                main.RegisterHotKey();
+            }
             this.Close();
         }
 

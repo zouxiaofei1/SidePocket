@@ -7,7 +7,8 @@ namespace SidePocket
 {
     public partial class MainWindow : Window
     {
-        private const int HOTKEY_ID = 9000;
+        private const int POCKET_HOTKEY_ID = 9000;
+        private const int RESTORE_HOTKEY_ID = 9001;
         private HwndSource? _source;
         private Forms.NotifyIcon? _notifyIcon;
 
@@ -50,6 +51,20 @@ namespace SidePocket
             _notifyIcon.Visible = true;
             _notifyIcon.Text = "SidePocket";
             _notifyIcon.MouseDown += NotifyIcon_MouseDown;
+            _notifyIcon.MouseDoubleClick += NotifyIcon_MouseDoubleClick;
+        }
+
+        private void NotifyIcon_MouseDoubleClick(object? sender, Forms.MouseEventArgs e)
+        {
+            if (e.Button == Forms.MouseButtons.Left)
+            {
+                var settings = new SettingsWindow();
+                settings.Show();
+                var helper = new WindowInteropHelper(settings);
+                NativeMethods.SetForegroundWindow(helper.Handle);
+                settings.Activate();
+                settings.Focus();
+            }
         }
 
         private void NotifyIcon_MouseDown(object? sender, Forms.MouseEventArgs e)
@@ -90,23 +105,50 @@ namespace SidePocket
             }
         }
 
-        private void RegisterHotKey()
+        public void RegisterHotKey()
         {
             var helper = new WindowInteropHelper(this);
-            // 注册 Win + ~ (VK_OEM_3)
-            if (!NativeMethods.RegisterHotKey(helper.Handle, HOTKEY_ID, NativeMethods.MOD_WIN, NativeMethods.VK_OEM_3))
+            NativeMethods.UnregisterHotKey(helper.Handle, POCKET_HOTKEY_ID);
+            NativeMethods.UnregisterHotKey(helper.Handle, RESTORE_HOTKEY_ID);
+
+            // Register Pocket HotKey
+            RegisterSingleHotKey(helper.Handle, POCKET_HOTKEY_ID, ConfigManager.Current.PocketHotKey);
+            // Register Restore HotKey
+            RegisterSingleHotKey(helper.Handle, RESTORE_HOTKEY_ID, ConfigManager.Current.RestoreHotKey);
+        }
+
+        private void RegisterSingleHotKey(IntPtr hwnd, int id, HotKeyConfig config)
+        {
+            uint modifiers = 0;
+            if ((config.Modifiers & System.Windows.Input.ModifierKeys.Alt) != 0) modifiers |= (uint)NativeMethods.MOD_ALT;
+            if ((config.Modifiers & System.Windows.Input.ModifierKeys.Control) != 0) modifiers |= (uint)NativeMethods.MOD_CONTROL;
+            if ((config.Modifiers & System.Windows.Input.ModifierKeys.Shift) != 0) modifiers |= (uint)NativeMethods.MOD_SHIFT;
+            if ((config.Modifiers & System.Windows.Input.ModifierKeys.Windows) != 0) modifiers |= (uint)NativeMethods.MOD_WIN;
+
+            uint vk = (uint)System.Windows.Input.KeyInterop.VirtualKeyFromKey(config.Key);
+
+            if (!NativeMethods.RegisterHotKey(hwnd, id, modifiers, vk))
             {
-                System.Windows.MessageBox.Show("热键注册失败，可能被占用");
+                System.Windows.MessageBox.Show($"热键 {config} 注册失败，可能被占用");
             }
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             const int WM_HOTKEY = 0x0312;
-            if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
+            if (msg == WM_HOTKEY)
             {
-                PocketActiveWindow();
-                handled = true;
+                int id = wParam.ToInt32();
+                if (id == POCKET_HOTKEY_ID)
+                {
+                    PocketActiveWindow();
+                    handled = true;
+                }
+                else if (id == RESTORE_HOTKEY_ID)
+                {
+                    PocketManager.RestoreLast();
+                    handled = true;
+                }
             }
             return IntPtr.Zero;
         }
@@ -124,8 +166,23 @@ namespace SidePocket
             if (PocketManager.IsPocketed(targetHwnd))
                 return; // 已经收纳过了
 
+            // 过滤系统窗口（桌面、任务栏等）
+            var className = new System.Text.StringBuilder(256);
+            NativeMethods.GetClassName(targetHwnd, className, className.Capacity);
+            string cls = className.ToString();
+            
+            // 常见的桌面和系统 UI 类名
+            if (cls == "Progman" || cls == "WorkerW" || cls == "Shell_TrayWnd" || cls == "Shell_SecondaryTrayWnd" || 
+                cls == "NotifyIconOverflowWindow" || cls == "TrayNotifyWnd" || cls == "Windows.UI.Core.CoreWindow")
+                return;
+
             // 2. 获取图标
             var icon = IconHelper.GetIcon(targetHwnd);
+            
+            // 如果获取不到图标，且不是已知的可收纳窗口（可选逻辑：判断是否是普通窗口样式）
+            // 用户提到：通过图标不存在或者为默认判定
+            if (icon == null)
+                return;
 
             // 3. 隐藏目标窗口
             NativeMethods.ShowWindow(targetHwnd, NativeMethods.SW_HIDE);
@@ -153,12 +210,31 @@ namespace SidePocket
             _trigger.Show();
         }
 
+        private bool _isClosing = false;
         protected override void OnClosed(EventArgs e)
         {
+            if (_isClosing) return;
+            _isClosing = true;
+
+            // 恢复所有收纳的窗口
+            PocketManager.RestoreAll();
+
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+                _notifyIcon = null;
+            }
+
             _source?.RemoveHook(HwndHook);
             var helper = new WindowInteropHelper(this);
-            NativeMethods.UnregisterHotKey(helper.Handle, HOTKEY_ID);
+            NativeMethods.UnregisterHotKey(helper.Handle, POCKET_HOTKEY_ID);
+            NativeMethods.UnregisterHotKey(helper.Handle, RESTORE_HOTKEY_ID);
+            
             base.OnClosed(e);
+
+            // 强制退出进程，确保所有后台线程和窗口被清理
+            Environment.Exit(0);
         }
     }
 }
