@@ -1,0 +1,19 @@
+<Window x:Class="SidePocket.FluentContextMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False"
+        Width="160" SizeToContent="Height"
+        Deactivated="Window_Deactivated">
+    <Border CornerRadius="8" Background="#F2FFFFFF" BorderBrush="#33000000" BorderThickness="1" Margin="10">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
+        </Border.Effect>
+        <StackPanel Margin="4">
+            <Button Content="还原所有窗口" Style="{StaticResource MenuButtonStyle}" Click="RestoreAll_Click"/>
+            <Button Content="设置快捷键" Style="{StaticResource MenuButtonStyle}" Click="Settings_Click"/>
+            <Separator Background="#11000000" Margin="4,2"/>
+            <Button Content="退出" Style="{StaticResource MenuButtonStyle}" Click="Exit_Click"/>
+        </StackPanel>
+    </Border>
+</Window>

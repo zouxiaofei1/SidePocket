@@ -1,0 +1,15 @@
+<Window x:Class="SidePocket.PocketButtonWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        Topmost="True" ShowInTaskbar="False"
+        Width="32" Height="32" ResizeMode="NoResize">
+    <Border Name="MainBorder" CornerRadius="4" Background="#CCFFFFFF" BorderBrush="#33000000" 
+            BorderThickness="1" Cursor="Hand" MouseLeftButtonDown="Border_MouseLeftButtonDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.2"/>
+        </Border.Effect>
+        <Path Data="M4,4 L28,4 L28,28 L4,28 Z M10,10 L22,10 L22,22 L10,22 Z" 
+              Fill="#0078D4" Stretch="Uniform" Margin="6"/>
+    </Border>
+</Window>
