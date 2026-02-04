@@ -68,13 +68,14 @@ namespace SidePocket
                             if (!string.IsNullOrEmpty(appPath))
                             {
                                 // Wrap path in quotes to handle spaces
-                                key.SetValue(APP_NAME, """ + appPath + """);
+                                key.SetValue(APP_NAME, $"\"{appPath}\" --autostart");
                             }
                         }
                         else
                         {
                             key.DeleteValue(APP_NAME, false);
                         }
+                        ToastNotification.Show("开机启动设置已保存", this);
                     }
                 }
             }
@@ -105,6 +106,7 @@ namespace SidePocket
         {
             if (sender is Border border)
             {
+                e.Handled = true; // 阻止事件冒泡到窗口拖动处理器
                 StartRecording(border);
             }
         }
@@ -113,6 +115,7 @@ namespace SidePocket
         {
             _activeRecorder = border;
             _activeRecorder.Focus();
+            InputMethod.SetIsInputMethodEnabled(_activeRecorder, false);
             _activeRecorder.Background = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["HoverBackgroundBrush"];
             
             if (_activeRecorder.Tag?.ToString() == "Pocket")
@@ -123,7 +126,7 @@ namespace SidePocket
 
         private void HotKeyRecorder_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (_activeRecorder != null)
+            if (_activeRecorder != null && _activeRecorder == sender)
             {
                 _activeRecorder.Background = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["RecorderBackgroundBrush"];
                 _activeRecorder = null;
@@ -139,6 +142,7 @@ namespace SidePocket
 
             var key = e.Key;
             if (key == Key.System) key = e.SystemKey;
+            if (key == Key.ImeProcessed) key = e.ImeProcessedKey;
 
             var modifiers = Keyboard.Modifiers;
 
@@ -165,6 +169,17 @@ namespace SidePocket
             targetConfig.Key = key;
 
             _activeRecorder.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            AutoSave();
+        }
+
+        private void AutoSave()
+        {
+            ConfigManager.Save(_tempConfig);
+            if (System.Windows.Application.Current.MainWindow is MainWindow main)
+            {
+                main.RegisterHotKey();
+            }
+            ToastNotification.Show("快捷键已保存", this);
         }
 
         private string GetModifiersText(ModifierKeys modifiers)
@@ -181,16 +196,7 @@ namespace SidePocket
         {
             _tempConfig = new FullConfig();
             UpdateDisplay();
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigManager.Save(_tempConfig);
-            if (System.Windows.Application.Current.MainWindow is MainWindow main)
-            {
-                main.RegisterHotKey();
-            }
-            this.Close();
+            AutoSave();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

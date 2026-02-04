@@ -19,9 +19,21 @@ namespace SidePocket
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // 通过主窗口逻辑执行收纳
-            ((MainWindow)System.Windows.Application.Current.MainWindow).PocketActiveWindow();
-            this.Hide();
+            if (this.Resources["ExitStoryboard"] is System.Windows.Media.Animation.Storyboard sb)
+            {
+                sb.Completed += (s, e2) =>
+                {
+                    // 通过主窗口逻辑执行收纳
+                    ((MainWindow)System.Windows.Application.Current.MainWindow).PocketActiveWindow();
+                    this.Hide();
+                };
+                sb.Begin(this);
+            }
+            else
+            {
+                ((MainWindow)System.Windows.Application.Current.MainWindow).PocketActiveWindow();
+                this.Hide();
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
         Title="SidePocket 设置" Height="430" Width="400"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True">
-    <Border x:Name="RootBorder" CornerRadius="12" Background="{DynamicResource WindowBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="10" RenderTransformOrigin="0.5,0.5">
+    <Border x:Name="RootBorder" CornerRadius="12" Background="{DynamicResource WindowBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="10" RenderTransformOrigin="0.5,0.5" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
         <Border.RenderTransform>
             <TransformGroup>
                 <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -12,7 +12,7 @@
             </TransformGroup>
         </Border.RenderTransform>
         <Border.Effect>
-            <DropShadowEffect x:Name="RootShadow" BlurRadius="20" ShadowDepth="2" Opacity="0.25"/>
+            <DropShadowEffect x:Name="RootShadow" BlurRadius="25" ShadowDepth="0" Opacity="0.3" Color="#0078D4"/>
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
 
             <!-- Title Bar Area -->
-            <Grid Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid Background="Transparent">
                 <TextBlock Text="快捷键设置" FontSize="12" Margin="16,12,0,12" Foreground="{DynamicResource HeaderTextBrush}" VerticalAlignment="Center"/>
                 <Button Content="" FontFamily="Segoe MDL2 Assets" FontSize="10" Background="Transparent" BorderThickness="0" 
                         Foreground="{DynamicResource MainTextBrush}"
@@ -63,54 +63,145 @@
                 </TextBlock>
                 <TextBlock x:Name="SubTitleText" Text="使用快捷键快速将当前激活的窗口收纳到屏幕边缘。" FontSize="13" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap" Margin="0,0,0,24"/>
 
-                <Border x:Name="SettingsCard" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16">
+                <Border x:Name="SettingsCard" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="20" RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            <TranslateTransform Y="0"/>
+                        </TransformGroup>
+                    </Border.RenderTransform>
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.05"/>
+                        <DropShadowEffect x:Name="CardShadow" BlurRadius="15" ShadowDepth="0" Opacity="0.1"/>
                     </Border.Effect>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.01" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.01" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.2" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="25" Duration="0:0:0.3"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Effect.Opacity" To="0.1" Duration="0:0:0.3"/>
+                                                <DoubleAnimation Storyboard.TargetProperty="Effect.BlurRadius" To="15" Duration="0:0:0.3"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,16">
-                            <TextBlock Text="收纳当前窗口" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{DynamicResource MainTextBrush}"/>
-                            <Border x:Name="PocketHotKeyRecorder" Background="{DynamicResource RecorderBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" 
-                                    HorizontalAlignment="Right" Padding="10,6" MinWidth="160" Cursor="Hand" Tag="Pocket"
+                        <DockPanel Margin="0,0,0,20">
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Path Data="M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L6.04,7.5L12,10.85L17.96,7.5L12,4.15M5,15.91L11,19.29V12.58L5,9.21V15.91M19,15.91V9.21L13,12.58V19.29L19,15.91Z" Fill="{DynamicResource PrimaryGradientBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="收纳当前窗口" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}" FontWeight="Medium"/>
+                            </StackPanel>
+                            <Border x:Name="PocketHotKeyRecorder" Background="{DynamicResource RecorderBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" 
+                                    HorizontalAlignment="Right" Padding="12,8" MinWidth="160" Cursor="Hand" Tag="Pocket"
                                     Focusable="True" MouseLeftButtonDown="HotKeyRecorder_MouseLeftButtonDown"
-                                    PreviewKeyDown="HotKeyRecorder_PreviewKeyDown" LostFocus="HotKeyRecorder_LostFocus">
+                                    PreviewKeyDown="HotKeyRecorder_PreviewKeyDown" LostFocus="HotKeyRecorder_LostFocus"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Border.RenderTransform>
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
                                             <Trigger Property="IsFocused" Value="True">
                                                 <Setter Property="BorderBrush" Value="#0067C0"/>
-                                                <Setter Property="BorderThickness" Value="2"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                <Setter Property="Background" Value="White"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" Value="#0067C0"/>
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.02" Duration="0:0:0.2"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.02" Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock x:Name="PocketHotKeyDisplay" Text="Win + ~" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}"/>
+                                <TextBlock x:Name="PocketHotKeyDisplay" Text="Win + ~" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}" FontSize="13"/>
                             </Border>
                         </DockPanel>
                         <DockPanel>
-                            <TextBlock Text="恢复上一个窗口" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{DynamicResource MainTextBrush}"/>
-                            <Border x:Name="RestoreHotKeyRecorder" Background="{DynamicResource RecorderBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" 
-                                    HorizontalAlignment="Right" Padding="10,6" MinWidth="160" Cursor="Hand" Tag="Restore"
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Path Data="M13,3H19V9H17V6.41L13.41,10L12,8.59L15.59,5H13V3M9,13H3V19H5V16.41L8.59,20L10,18.59L6.41,15H9V13Z" Fill="{DynamicResource PrimaryGradientBrush}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="恢复上一个窗口" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}" FontWeight="Medium"/>
+                            </StackPanel>
+                            <Border x:Name="RestoreHotKeyRecorder" Background="{DynamicResource RecorderBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" 
+                                    HorizontalAlignment="Right" Padding="12,8" MinWidth="160" Cursor="Hand" Tag="Restore"
                                     Focusable="True" MouseLeftButtonDown="HotKeyRecorder_MouseLeftButtonDown"
-                                    PreviewKeyDown="HotKeyRecorder_PreviewKeyDown" LostFocus="HotKeyRecorder_LostFocus">
+                                    PreviewKeyDown="HotKeyRecorder_PreviewKeyDown" LostFocus="HotKeyRecorder_LostFocus"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Border.RenderTransform>
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Style.Triggers>
                                             <Trigger Property="IsFocused" Value="True">
                                                 <Setter Property="BorderBrush" Value="#0067C0"/>
-                                                <Setter Property="BorderThickness" Value="2"/>
+                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                <Setter Property="Background" Value="White"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" Value="#0067C0"/>
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.02" Duration="0:0:0.2"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.02" Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.0" Duration="0:0:0.2"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.0" Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock x:Name="RestoreHotKeyDisplay" Text="Win + Shift + ~" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}"/>
+                                <TextBlock x:Name="RestoreHotKeyDisplay" Text="Win + Shift + ~" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}" FontSize="13"/>
                             </Border>
                         </DockPanel>
 
                         <Rectangle Height="1" Fill="{DynamicResource BorderBrush}" Margin="0,16"/>
 
                         <DockPanel>
-                            <TextBlock Text="开机启动" VerticalAlignment="Center" DockPanel.Dock="Left" Foreground="{DynamicResource MainTextBrush}"/>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                <Path Data="M7,2V13H10V22L17,10H13L17,2H7Z" Fill="{DynamicResource PrimaryGradientBrush}" Width="16" Height="16" Stretch="Uniform" Margin="1,0,13,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="开机启动" VerticalAlignment="Center" Foreground="{DynamicResource MainTextBrush}" FontWeight="Medium"/>
+                            </StackPanel>
                             <CheckBox x:Name="AutoStartCheck" HorizontalAlignment="Right" VerticalAlignment="Center" Click="AutoStart_Click" Style="{StaticResource FluentCheckBoxStyle}"/>
                         </DockPanel>
                     </StackPanel>
@@ -148,10 +239,28 @@
             <!-- Bottom Actions -->
             <Border Grid.Row="2" Background="{DynamicResource HoverBackgroundBrush}" CornerRadius="0,0,12,12" Padding="20,16">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="保存" Click="Save_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,12,0" Width="80"/>
-                    <Button Content="取消" Click="Cancel_Click" Style="{StaticResource SecondaryButtonStyle}" Width="80"/>
+                    <Button Content="确定" Click="Cancel_Click" Style="{StaticResource PrimaryButtonStyle}" Width="80"/>
                 </StackPanel>
             </Border>
+
+            <!-- 动态背景装饰 -->
+            <Canvas Grid.RowSpan="3" IsHitTestVisible="False">
+                <Ellipse Width="300" Height="300" Canvas.Top="-150" Canvas.Left="-150" Fill="{DynamicResource AccentGradientBrush}" Opacity="0.07">
+                    <Ellipse.RenderTransform>
+                        <TranslateTransform x:Name="BgEllipse1Trans" X="0" Y="0"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse Width="250" Height="250" Canvas.Bottom="-100" Canvas.Right="-100" Fill="{DynamicResource PrimaryGradientBrush}" Opacity="0.07">
+                    <Ellipse.RenderTransform>
+                        <TranslateTransform x:Name="BgEllipse2Trans" X="0" Y="0"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <Ellipse Width="150" Height="150" Canvas.Top="100" Canvas.Right="-50" Fill="{DynamicResource SuccessGradientBrush}" Opacity="0.04">
+                    <Ellipse.RenderTransform>
+                        <TranslateTransform x:Name="BgEllipse3Trans" X="0" Y="0"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Canvas>
         </Grid>
     </Border>
 
@@ -187,6 +296,12 @@
                             <QuarticEase EasingMode="EaseOut"/>
                         </ThicknessAnimation.EasingFunction>
                     </ThicknessAnimation>
+
+                    <!-- 背景背景浮动动画 -->
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="X" From="-20" To="20" Duration="0:0:5" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="Y" From="-20" To="20" Duration="0:0:7" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse2Trans" Storyboard.TargetProperty="X" From="20" To="-20" Duration="0:0:6" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse3Trans" Storyboard.TargetProperty="Y" From="-30" To="30" Duration="0:0:8" AutoReverse="True" RepeatBehavior="Forever"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>

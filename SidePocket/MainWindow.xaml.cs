@@ -34,6 +34,24 @@ namespace SidePocket
             RegisterHotKey();
             InitEdgeTrigger();
             InitNotifyIcon();
+
+            // 检查是否是手动启动（非命令行参数，或特定参数）
+            // Windows 开机自启动通常不带额外参数，但我们可以通过 Environment.CommandLine 或自定义逻辑判断
+            // 简单的做法：如果没有参数，或者不是通过注册表特定路径启动
+            bool isAutoStart = false;
+            foreach (var arg in Environment.GetCommandLineArgs())
+            {
+                if (arg.ToLower() == "--autostart")
+                {
+                    isAutoStart = true;
+                    break;
+                }
+            }
+
+            if (!isAutoStart)
+            {
+                ToastNotification.Show("SidePocket 已运行", this);
+            }
         }
 
         private void InitNotifyIcon()
