@@ -164,6 +164,15 @@ namespace SidePocket
                 return;
             }
 
+            if (modifiers == ModifierKeys.None)
+            {
+                if (_activeRecorder.Tag?.ToString() == "Pocket")
+                    PocketHotKeyDisplay.Text = "需要组合键 (Ctrl/Alt/Shift/Win)";
+                else
+                    RestoreHotKeyDisplay.Text = "需要组合键 (Ctrl/Alt/Shift/Win)";
+                return;
+            }
+
             var targetConfig = _activeRecorder.Tag?.ToString() == "Pocket" ? _tempConfig.PocketHotKey : _tempConfig.RestoreHotKey;
             targetConfig.Modifiers = modifiers;
             targetConfig.Key = key;

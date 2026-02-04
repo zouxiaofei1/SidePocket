@@ -4,7 +4,57 @@
         Title="SidePocket 设置" Height="430" Width="400"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" ShowInTaskbar="True">
-    <Border x:Name="RootBorder" CornerRadius="12" Background="{DynamicResource WindowBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="10" RenderTransformOrigin="0.5,0.5" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+    
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <!-- 窗口入场 -->
+                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.4"/>
+                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0.85" To="1" Duration="0:0:0.5">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase Amplitude="0.4" EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0.85" To="1" Duration="0:0:0.5">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase Amplitude="0.4" EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+
+                    <!-- 标题动画 -->
+                    <DoubleAnimation Storyboard.TargetName="TitleText" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-30" To="0" Duration="0:0:0.6">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="SubTitleText" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.8"/>
+
+                    <!-- 内容卡片动画 -->
+                    <DoubleAnimation Storyboard.TargetName="SettingsCard" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6"/>
+                    <ThicknessAnimation Storyboard.TargetName="SettingsCard" Storyboard.TargetProperty="Margin" From="0,30,0,-30" To="0" Duration="0:0:0.6">
+                        <ThicknessAnimation.EasingFunction>
+                            <QuarticEase EasingMode="EaseOut"/>
+                        </ThicknessAnimation.EasingFunction>
+                    </ThicknessAnimation>
+
+                    <!-- 背景背景浮动动画 -->
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="X" From="-20" To="20" Duration="0:0:5" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="Y" From="-20" To="20" Duration="0:0:7" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse2Trans" Storyboard.TargetProperty="X" From="20" To="-20" Duration="0:0:6" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse2Trans" Storyboard.TargetProperty="Y" From="10" To="-10" Duration="0:0:5" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="BgEllipse3Trans" Storyboard.TargetProperty="Y" From="-30" To="30" Duration="0:0:8" AutoReverse="True" RepeatBehavior="Forever"/>
+                    
+                    <!-- 浮动装饰物动画 -->
+                    <DoubleAnimation Storyboard.TargetName="FloatingShape1" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:20" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="FloatingShape2" Storyboard.TargetProperty="ScaleX" From="0.8" To="1.2" Duration="0:0:4" AutoReverse="True" RepeatBehavior="Forever"/>
+                    <DoubleAnimation Storyboard.TargetName="FloatingShape2" Storyboard.TargetProperty="ScaleY" From="0.8" To="1.2" Duration="0:0:4" AutoReverse="True" RepeatBehavior="Forever"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Border x:Name="RootBorder" CornerRadius="12" Background="{DynamicResource WindowBackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Margin="15" RenderTransformOrigin="0.5,0.5" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
         <Border.RenderTransform>
             <TransformGroup>
                 <ScaleTransform ScaleX="1" ScaleY="1"/>
@@ -12,7 +62,7 @@
             </TransformGroup>
         </Border.RenderTransform>
         <Border.Effect>
-            <DropShadowEffect x:Name="RootShadow" BlurRadius="25" ShadowDepth="0" Opacity="0.3" Color="#0078D4"/>
+            <DropShadowEffect x:Name="RootShadow" BlurRadius="30" ShadowDepth="0" Opacity="0.4" Color="#0078D4"/>
         </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
@@ -21,8 +71,42 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- 裁剪后的背景装饰层 -->
+            <Border Grid.RowSpan="3" CornerRadius="11" ClipToBounds="True">
+                <Canvas IsHitTestVisible="False">
+                    <!-- 动态渐变光晕 -->
+                    <Ellipse Width="400" Height="400" Canvas.Top="-200" Canvas.Left="-150" Fill="{DynamicResource AccentGradientBrush}" Opacity="0.12">
+                        <Ellipse.RenderTransform>
+                            <TranslateTransform x:Name="BgEllipse1Trans" X="0" Y="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Width="350" Height="350" Canvas.Bottom="-150" Canvas.Right="-100" Fill="{DynamicResource PrimaryGradientBrush}" Opacity="0.1">
+                        <Ellipse.RenderTransform>
+                            <TranslateTransform x:Name="BgEllipse2Trans" X="0" Y="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Width="200" Height="200" Canvas.Top="120" Canvas.Right="-80" Fill="{DynamicResource SuccessGradientBrush}" Opacity="0.08">
+                        <Ellipse.RenderTransform>
+                            <TranslateTransform x:Name="BgEllipse3Trans" X="0" Y="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    
+                    <!-- 浮动装饰物 -->
+                    <Path Data="M10,0 L20,20 L0,20 Z" Fill="{DynamicResource PrimaryGradientBrush}" Opacity="0.05" Canvas.Left="50" Canvas.Top="100">
+                        <Path.RenderTransform>
+                            <RotateTransform x:Name="FloatingShape1" Angle="0" CenterX="10" CenterY="10"/>
+                        </Path.RenderTransform>
+                    </Path>
+                    <Path Data="M0,10 A10,10 0 1,1 20,10 A10,10 0 1,1 0,10" Fill="{DynamicResource AccentGradientBrush}" Opacity="0.05" Canvas.Right="40" Canvas.Bottom="120">
+                        <Path.RenderTransform>
+                            <ScaleTransform x:Name="FloatingShape2" ScaleX="1" ScaleY="1" CenterX="10" CenterY="10"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+            </Border>
+
             <!-- Title Bar Area -->
-            <Grid Background="Transparent">
+            <Grid Grid.Row="0" Background="Transparent">
                 <TextBlock Text="快捷键设置" FontSize="12" Margin="16,12,0,12" Foreground="{DynamicResource HeaderTextBrush}" VerticalAlignment="Center"/>
                 <Button Content="" FontFamily="Segoe MDL2 Assets" FontSize="10" Background="Transparent" BorderThickness="0" 
                         Foreground="{DynamicResource MainTextBrush}"
@@ -242,68 +326,6 @@
                     <Button Content="确定" Click="Cancel_Click" Style="{StaticResource PrimaryButtonStyle}" Width="80"/>
                 </StackPanel>
             </Border>
-
-            <!-- 动态背景装饰 -->
-            <Canvas Grid.RowSpan="3" IsHitTestVisible="False">
-                <Ellipse Width="300" Height="300" Canvas.Top="-150" Canvas.Left="-150" Fill="{DynamicResource AccentGradientBrush}" Opacity="0.07">
-                    <Ellipse.RenderTransform>
-                        <TranslateTransform x:Name="BgEllipse1Trans" X="0" Y="0"/>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-                <Ellipse Width="250" Height="250" Canvas.Bottom="-100" Canvas.Right="-100" Fill="{DynamicResource PrimaryGradientBrush}" Opacity="0.07">
-                    <Ellipse.RenderTransform>
-                        <TranslateTransform x:Name="BgEllipse2Trans" X="0" Y="0"/>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-                <Ellipse Width="150" Height="150" Canvas.Top="100" Canvas.Right="-50" Fill="{DynamicResource SuccessGradientBrush}" Opacity="0.04">
-                    <Ellipse.RenderTransform>
-                        <TranslateTransform x:Name="BgEllipse3Trans" X="0" Y="0"/>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-            </Canvas>
         </Grid>
     </Border>
-
-    <Window.Triggers>
-        <EventTrigger RoutedEvent="Window.Loaded">
-            <BeginStoryboard>
-                <Storyboard>
-                    <!-- 窗口入场 -->
-                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.4"/>
-                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0.85" To="1" Duration="0:0:0.5">
-                        <DoubleAnimation.EasingFunction>
-                            <BackEase Amplitude="0.4" EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                    <DoubleAnimation Storyboard.TargetName="RootBorder" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0.85" To="1" Duration="0:0:0.5">
-                        <DoubleAnimation.EasingFunction>
-                            <BackEase Amplitude="0.4" EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-
-                    <!-- 标题动画 -->
-                    <DoubleAnimation Storyboard.TargetName="TitleText" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="-30" To="0" Duration="0:0:0.6">
-                        <DoubleAnimation.EasingFunction>
-                            <CubicEase EasingMode="EaseOut"/>
-                        </DoubleAnimation.EasingFunction>
-                    </DoubleAnimation>
-                    <DoubleAnimation Storyboard.TargetName="SubTitleText" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.8"/>
-
-                    <!-- 内容卡片动画 -->
-                    <DoubleAnimation Storyboard.TargetName="SettingsCard" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6"/>
-                    <ThicknessAnimation Storyboard.TargetName="SettingsCard" Storyboard.TargetProperty="Margin" From="0,30,0,-30" To="0" Duration="0:0:0.6">
-                        <ThicknessAnimation.EasingFunction>
-                            <QuarticEase EasingMode="EaseOut"/>
-                        </ThicknessAnimation.EasingFunction>
-                    </ThicknessAnimation>
-
-                    <!-- 背景背景浮动动画 -->
-                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="X" From="-20" To="20" Duration="0:0:5" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="BgEllipse1Trans" Storyboard.TargetProperty="Y" From="-20" To="20" Duration="0:0:7" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="BgEllipse2Trans" Storyboard.TargetProperty="X" From="20" To="-20" Duration="0:0:6" AutoReverse="True" RepeatBehavior="Forever"/>
-                    <DoubleAnimation Storyboard.TargetName="BgEllipse3Trans" Storyboard.TargetProperty="Y" From="-30" To="30" Duration="0:0:8" AutoReverse="True" RepeatBehavior="Forever"/>
-                </Storyboard>
-            </BeginStoryboard>
-        </EventTrigger>
-    </Window.Triggers>
 </Window>
